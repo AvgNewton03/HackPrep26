@@ -1,1 +1,30 @@
-alhnalf 
+1. Core Backend Technologies
+Framework: Next.js (App Router) utilizing Server Actions and APIs as the middleman between the client and the database.  
+MD
+Database & Auth: Supabase will handle user authentication and host the PostgreSQL database.  
+MD
+Content Generation: An LLM API (OpenAI or Gemini) will be used to dynamically generate lessons and quizzes.  
+MD
+2. MVP Database Schema (Supabase/PostgreSQL)
+Your database needs exactly four tables to support the MVP features:
+hunters (Users): Stores user profiles with columns for id, username, level, mana_xp, current_streak, highest_streak, and hunter_class.  
+MD
+map_nodes (Map State): Manages the physical map locations using id, x_coord, y_coord, is_unlocked, and owner_id.  
+MD
+gates (Subjects): Tracks specific topics tied to nodes using id, node_id, topic, current_rank, and cleared_count.  
+MD
+raid_history (Quiz Logs): Validates and stores performance data using id, hunter_id, gate_id, score, time_taken, and created_at.  
+MD
+3. Essential Server Actions & API Logic
+The Next.js backend acts as the game's "System." It must handle the following logical flows:
+Secure LLM Generation: The backend must securely call the LLM API to generate a concise "Knowledge Download" explainer and exactly 5 MCQs based strictly on that text.  
+MD
+Dynamic Prompting: The backend logic must inject the specific Gate "Rank" (from E to S) into the LLM prompt to properly scale the reading level and question difficulty.  
+MD
+Answer Validation & Mana Calculation: Server actions must receive the user's quiz answers, securely validate them, compute the Mana (XP) earned, and update the hunters database table.  
+MD
+Adaptive Node Upgrades: If a user passes a Gate with 100% accuracy, the backend must update the gates table so the node becomes a harder rank for the next attempt.  
+MD
+Misconception Analysis: The backend requires an endpoint to trigger the LLM to explain a wrong answer's misconception without revealing the correct answer immediately.  
+MD
+Streak & Penalty Enforcement: The backend must track daily logins and reset a user's streak to 0 if they break their daily streak and subsequently fail the 60-second rapid-fire "Penalty Zone" quiz.
