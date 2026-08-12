@@ -11,8 +11,9 @@ interface SystemHUDProps {
 }
 
 export default function SystemHUD({ xp, level, dailyStreak, answerStreak }: SystemHUDProps) {
-  const currentLevelXp = xp % 100;
-  const xpPercentage = currentLevelXp;
+  const xpPerLevel = 250;
+  const currentLevelXp = xp % xpPerLevel;
+  const xpPercentage = (currentLevelXp / xpPerLevel) * 100;
 
   return (
     <div className="w-full bg-black/60 backdrop-blur-xl border-b border-[#00e5ff]/30 p-4 sticky top-0 z-50">
@@ -35,7 +36,7 @@ export default function SystemHUD({ xp, level, dailyStreak, answerStreak }: Syst
         <div className="flex-1 max-w-md w-full">
           <div className="flex justify-between text-xs font-mono mb-1 text-gray-400">
             <span>XP PROGRESS</span>
-            <span>{currentLevelXp} / 100</span>
+            <span>{currentLevelXp} / {xpPerLevel}</span>
           </div>
           <div className="w-full h-3 bg-[#111] rounded-full overflow-hidden border border-[#333]">
             <motion.div

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { topics, badges } from "@/lib/mockData";
 import { twMerge } from "tailwind-merge";
@@ -8,6 +9,8 @@ import { Lock, ShieldAlert, Flame } from "lucide-react";
 interface DashboardProps {
   unlockedBadges: string[];
   onSelectTopic: (topicId: string, topicName: string, rank: string) => void;
+  onEnterPenaltyZone?: () => void;
+  onGenerateCustomQuest?: (topic: string) => void;
 }
 
 const rankColors: Record<string, string> = {
@@ -19,7 +22,14 @@ const rankColors: Record<string, string> = {
   S: "border-[#ff003c] text-[#ff003c] shadow-[#ff003c]/20",
 };
 
-export default function Dashboard({ unlockedBadges, onSelectTopic }: DashboardProps) {
+export default function Dashboard({ unlockedBadges, onSelectTopic, onEnterPenaltyZone, onGenerateCustomQuest }: DashboardProps) {
+  const [customTopic, setCustomTopic] = useState("");
+
+  const handleGenerate = () => {
+    if (customTopic.trim() && onGenerateCustomQuest) {
+      onGenerateCustomQuest(customTopic.trim());
+    }
+  };
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -40,10 +50,39 @@ export default function Dashboard({ unlockedBadges, onSelectTopic }: DashboardPr
             <p className="text-gray-300">Daily Challenge: Survive 60 seconds of rapid-fire questions.</p>
           </div>
         </div>
-        <button className="bg-transparent border border-[#ff003c] text-[#ff003c] group-hover:bg-[#ff003c] group-hover:text-black font-mono font-bold tracking-widest px-6 py-3 transition-colors">
+        <button 
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onEnterPenaltyZone) onEnterPenaltyZone();
+          }}
+          className="bg-transparent border border-[#ff003c] text-[#ff003c] group-hover:bg-[#ff003c] group-hover:text-black font-mono font-bold tracking-widest px-6 py-3 transition-colors"
+        >
           ENTER PENALTY ZONE
         </button>
       </motion.div>
+
+      {/* Custom Quest Generator */}
+      <div className="mb-12 bg-black/40 backdrop-blur-md border border-[#00e5ff] p-6 rounded-sm shadow-[0_0_15px_rgba(0,229,255,0.1)]">
+        <h2 className="text-[#00e5ff] font-mono text-sm tracking-widest uppercase mb-4">&gt; Custom Quest Generator</h2>
+        <div className="flex flex-col md:flex-row gap-4">
+          <input 
+            type="text" 
+            value={customTopic}
+            onChange={(e) => setCustomTopic(e.target.value)}
+            maxLength={50}
+            placeholder="Enter any topic to learn... (max 50 chars)"
+            className="flex-1 bg-black/60 border border-[#333] focus:border-[#00e5ff] rounded-sm px-4 py-3 text-white font-mono tracking-wide outline-none transition-colors"
+            onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
+          />
+          <button 
+            onClick={handleGenerate}
+            disabled={!customTopic.trim()}
+            className="bg-[#00e5ff]/10 border border-[#00e5ff] text-[#00e5ff] hover:bg-[#00e5ff] hover:text-black disabled:opacity-50 disabled:hover:bg-[#00e5ff]/10 disabled:hover:text-[#00e5ff] font-mono font-bold tracking-widest px-8 py-3 transition-colors rounded-sm"
+          >
+            GENERATE QUEST
+          </button>
+        </div>
+      </div>
 
       {/* Gates Grid */}
       <div className="mb-12">

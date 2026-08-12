@@ -20,6 +20,8 @@ export interface Hunter {
   hunter_class: HunterClass;
   last_login_date: string | null;
   created_at: string;
+  total_answered: number;
+  unlocked_badges: string[];
 }
 
 export interface MapNode {
@@ -43,8 +45,11 @@ export interface Gate {
 export interface RaidHistory {
   id: string;
   hunter_id: string;
-  gate_id: string;
+  topic_name: string;
   score: number;
+  total_questions: number;
   time_taken: number;
+  boss_defeated: boolean;
+  performance_stats: any[];
   created_at: string;
 }

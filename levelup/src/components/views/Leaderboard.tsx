@@ -25,14 +25,18 @@ const mockHunters: Hunter[] = [
   { id: "10", name: "Ma Dong-Wook", rank: 10, class: "Tank", level: 83 },
 ];
 
-export default function Leaderboard() {
-  // Current user representation for UI purposes
+interface LeaderboardProps {
+  currentLevel?: number;
+  currentClass?: string;
+}
+
+export default function Leaderboard({ currentLevel = 1, currentClass = "E-Rank Hunter" }: LeaderboardProps) {
   const currentUser: Hunter = {
     id: "usr_12345",
     name: "Rishi Bhanushali",
     rank: 42,
-    class: "Necromancer",
-    level: 1,
+    class: currentClass,
+    level: currentLevel,
     isCurrentUser: true,
   };
 

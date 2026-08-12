@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Home, Trophy, User } from "lucide-react";
+import { Home, Trophy, User, History } from "lucide-react";
 
 interface SidebarProps {
   activeView: string;
@@ -12,7 +12,7 @@ export default function Sidebar({ activeView, setActiveView }: SidebarProps) {
   const navItems = [
     { id: "dashboard", label: "Gates", icon: Home },
     { id: "leaderboard", label: "Hunter Association", icon: Trophy },
-    { id: "profile", label: "Profile", icon: User },
+    { id: "recent-hunts", label: "Recent Hunts", icon: History },
   ];
 
   return (

@@ -44,6 +44,7 @@ export interface SubmitQuizRequest {
   hunterId?: string;
   answers: UserAnswer[];
   timeTakenSeconds: number;
+  performanceStats?: any[];
 }
 
 export interface QuestionResult {

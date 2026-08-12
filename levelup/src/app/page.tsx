@@ -8,6 +8,9 @@ import Dashboard from "@/components/views/Dashboard";
 import RaidQuiz from "@/components/views/RaidQuiz";
 import BossFight from "@/components/views/BossFight";
 import Leaderboard from "@/components/views/Leaderboard";
+import PenaltyZone from "@/components/views/PenaltyZone";
+import CustomQuest from "@/components/views/CustomQuest";
+import RecentHunts from "@/components/views/RecentHunts";
 
 // Import Server Actions
 import { getUserProfileAction } from "@/app/actions/hunter";
@@ -21,15 +24,18 @@ export default function Home() {
   const [hunterId] = useState("usr_12345");
   const [xp, setXp] = useState(0);
   const [level, setLevel] = useState(1);
+  const [hunterClass, setHunterClass] = useState("E-Rank Hunter");
   const [dailyStreak, setDailyStreak] = useState(0);
   const [answerStreak, setAnswerStreak] = useState(0);
   const [unlockedBadges, setUnlockedBadges] = useState<string[]>([]);
   
-  const [activeView, setActiveView] = useState<"dashboard" | "quiz" | "boss-fight" | "leaderboard">("dashboard");
+  const [activeView, setActiveView] = useState<"dashboard" | "quiz" | "boss-fight" | "leaderboard" | "penalty" | "custom-quest">("dashboard");
   const [activeTopicId, setActiveTopicId] = useState<string | null>(null);
+  const [customTopic, setCustomTopic] = useState<string>("");
   
   const [isLoadingLLM, setIsLoadingLLM] = useState(false);
   const [currentLessonData, setCurrentLessonData] = useState<any>(null);
+  const [penaltyLessonData, setPenaltyLessonData] = useState<any>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -38,6 +44,7 @@ export default function Home() {
         if (res.success && res.data) {
           setXp(res.data.stats.totalXp);
           setLevel(res.data.stats.currentLevel);
+          setHunterClass(res.data.hunterClass);
           setDailyStreak(res.data.stats.currentStreak);
           setAnswerStreak(res.data.stats.highestStreak);
           setUnlockedBadges(res.data.badges.map((b: any) => b.badgeId));
@@ -68,6 +75,32 @@ export default function Home() {
     }
   };
 
+  const handleEnterPenaltyZone = async () => {
+    setIsLoadingLLM(true);
+    try {
+      const res = await generateLessonAction({ 
+        topic: "Hard General Knowledge (Computer Science, Tech, and Logic)", 
+        gateRank: "S" 
+      });
+      if (res.success && res.data) {
+        setPenaltyLessonData(res.data);
+        setActiveView("penalty");
+      } else {
+        alert("System Error: Failed to generate Penalty Zone.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("System Error: Penalty generation failed.");
+    } finally {
+      setIsLoadingLLM(false);
+    }
+  };
+
+  const handleGenerateCustomQuest = (topic: string) => {
+    setCustomTopic(topic);
+    setActiveView("custom-quest");
+  };
+
   const handleQuizComplete = async (answers: any[], timeTakenSeconds: number) => {
     try {
       const res = await submitQuizAction({
@@ -81,6 +114,7 @@ export default function Home() {
         const updates = res.data.gamificationUpdates;
         setXp(updates.totalXp);
         setLevel(updates.currentLevel);
+        setHunterClass(updates.hunterClass);
         setDailyStreak(updates.streak.currentStreak);
         
         if (updates.newBadges && updates.newBadges.length > 0) {
@@ -118,8 +152,15 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-neutral-950 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] text-white relative overflow-hidden flex flex-col">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[radial-gradient(circle_at_center,#00e5ff15,transparent_60%)] blur-3xl pointer-events-none" />
+    <main className="min-h-screen bg-neutral-950 text-white relative overflow-hidden flex flex-col">
+      {/* Metallic Image Background */}
+      <div 
+        className="absolute inset-0 z-0 opacity-20 pointer-events-none mix-blend-screen grayscale contrast-150 bg-cover bg-center" 
+        style={{ backgroundImage: "url('/1347885.jpeg')" }} 
+      />
+      {/* Grid Overlay */}
+      <div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+      <div className="absolute top-0 z-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[radial-gradient(circle_at_center,#00e5ff15,transparent_60%)] blur-3xl pointer-events-none" />
 
       <SystemHUD 
         xp={xp}
@@ -156,6 +197,8 @@ export default function Home() {
               <Dashboard 
                 unlockedBadges={unlockedBadges}
                 onSelectTopic={handleSelectTopic}
+                onEnterPenaltyZone={handleEnterPenaltyZone}
+                onGenerateCustomQuest={handleGenerateCustomQuest}
               />
             </motion.div>
           )}
@@ -206,7 +249,70 @@ export default function Home() {
               exit={{ opacity: 0, y: -20 }}
               className="absolute inset-0 overflow-y-auto custom-scrollbar"
             >
-              <Leaderboard />
+              <Leaderboard 
+                currentLevel={level}
+                currentClass={hunterClass}
+              />
+            </motion.div>
+          )}
+
+          {activeView === "recent-hunts" && (
+            <motion.div 
+              key="recent-hunts"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="absolute inset-0 overflow-y-auto custom-scrollbar"
+            >
+              <RecentHunts />
+            </motion.div>
+          )}
+
+          {activeView === "penalty" && penaltyLessonData && (
+            <motion.div 
+              key="penalty"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="absolute inset-0 overflow-y-auto custom-scrollbar bg-black"
+            >
+              <PenaltyZone 
+                lessonData={penaltyLessonData}
+                hunterId={hunterId}
+                onComplete={handleQuizComplete}
+                onBack={() => {
+                  setPenaltyLessonData(null);
+                  setActiveView("dashboard");
+                }}
+              />
+            </motion.div>
+          )}
+
+          {activeView === "custom-quest" && customTopic && (
+            <motion.div 
+              key="custom-quest"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="absolute inset-0 overflow-y-auto custom-scrollbar bg-black/50"
+            >
+              <CustomQuest 
+                topic={customTopic}
+                onBack={(updates) => {
+                  if (updates) {
+                    setXp(updates.totalXp);
+                    setLevel(updates.currentLevel);
+                    setHunterClass(updates.hunterClass);
+                    setDailyStreak(updates.streak?.currentStreak || 0);
+                    
+                    if (updates.newBadges?.length > 0) {
+                      setUnlockedBadges(prev => [...prev, ...updates.newBadges.map((b: any) => b.badgeId)]);
+                    }
+                  }
+                  setCustomTopic("");
+                  setActiveView("dashboard");
+                }}
+              />
             </motion.div>
           )}
         </AnimatePresence>

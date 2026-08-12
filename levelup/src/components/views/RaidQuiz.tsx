@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, CheckCircle2, ShieldAlert } from "lucide-react";
 import { twMerge } from "tailwind-merge";
+import QuizStats, { QuizResultData } from "@/components/views/QuizStats";
 
 interface RaidQuizProps {
   lessonData: any;
@@ -14,12 +15,16 @@ interface RaidQuizProps {
 }
 
 export default function RaidQuiz({ lessonData, hunterId, onComplete, onEnterBossRoom, onBack }: RaidQuizProps) {
-  const [phase, setPhase] = useState<"lesson" | "quiz" | "submitting" | "cleared" | "boss-warning">("lesson");
+  const [phase, setPhase] = useState<"lesson" | "quiz" | "stats" | "submitting" | "cleared" | "boss-warning">("lesson");
   const [currentQIdx, setCurrentQIdx] = useState(0);
   const [selectedOptId, setSelectedOptId] = useState<string | null>(null);
   const [answers, setAnswers] = useState<{questionId: string, selectedOptionId: string}[]>([]);
   const [startTime, setStartTime] = useState<number>(0);
+  const [questionStartTime, setQuestionStartTime] = useState<number>(0);
   
+  // Results for analytics charts
+  const [performanceStats, setPerformanceStats] = useState<QuizResultData[]>([]);
+
   // Results from backend
   const [quizResults, setQuizResults] = useState<any>(null);
 
@@ -27,36 +32,52 @@ export default function RaidQuiz({ lessonData, hunterId, onComplete, onEnterBoss
 
   const handleStartQuiz = () => {
     setPhase("quiz");
-    setStartTime(Date.now());
+    const now = Date.now();
+    setStartTime(now);
+    setQuestionStartTime(now);
   };
 
   const handleNext = async () => {
     if (selectedOptId) {
       setAnswers(prev => [...prev, { questionId: currentQ.questionId, selectedOptionId: selectedOptId }]);
+      
+      const now = Date.now();
+      const timeTaken = Math.floor((now - questionStartTime) / 1000);
+      const isCorrect = currentQ.correctAnswer === parseInt(selectedOptId.replace('opt_', '')) - 1; // Basic mock logic, but since we rely on backend for actual score, we just check if it matches the correctAnswer index on client for stats. Wait, the frontend `currentQ.correctAnswer` has the exact index. The `selectedOptId` is `opt_1`, `opt_2`, etc.
+      const selectedIndex = parseInt(selectedOptId.replace('opt_', '')) - 1;
+      
+      setPerformanceStats(prev => [
+        ...prev,
+        { questionIndex: currentQIdx, isCorrect: selectedIndex === currentQ.correctAnswer, timeTaken }
+      ]);
+      setQuestionStartTime(now);
     }
     
     if (currentQIdx < lessonData.quiz.length - 1) {
       setCurrentQIdx(prev => prev + 1);
       setSelectedOptId(null);
     } else {
-      // Submitting the quiz
-      setPhase("submitting");
+      setPhase("stats");
+    }
+  };
+
+  const handleSubmitToBackend = async () => {
+    setPhase("submitting");
       const timeTaken = Math.floor((Date.now() - startTime) / 1000);
       
       const allAnswers = [...answers, { questionId: currentQ.questionId, selectedOptionId: selectedOptId }];
       
-      try {
-        const results = await onComplete(allAnswers, timeTaken);
-        setQuizResults(results);
-        if (results.score >= 2) {
-          setPhase("boss-warning");
-        } else {
-          setPhase("cleared");
-        }
-      } catch (err) {
-        alert("Failed to submit to system.");
-        onBack();
+    try {
+      const results = await onComplete(allAnswers, timeTaken);
+      setQuizResults(results);
+      if (results.score >= 2) {
+        setPhase("boss-warning");
+      } else {
+        setPhase("cleared");
       }
+    } catch (err) {
+      alert("Failed to submit to system.");
+      onBack();
     }
   };
 
@@ -87,9 +108,10 @@ export default function RaidQuiz({ lessonData, hunterId, onComplete, onEnterBoss
             <h3 className="text-[#00e5ff] font-mono text-sm tracking-widest mb-4">&gt; SYSTEM KNOWLEDGE DOWNLOAD...</h3>
             <div className="bg-black/60 backdrop-blur-md border border-[#333] p-8 rounded-sm text-lg leading-relaxed shadow-inner mb-8">
               <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.5 }}>
-                {lessonData.lessonContent.split('\n\n').map((para: string, i: number) => (
-                  <span key={i} className="block mb-4">{para}</span>
-                ))}
+                {lessonData.lessonContent.split('\n\n').map((para: string, i: number) => {
+                  const cleanedPara = para.replace(/[*#`_~]/g, '').trim();
+                  return cleanedPara ? <span key={i} className="block mb-4">{cleanedPara}</span> : null;
+                })}
               </motion.p>
             </div>
             <div className="mt-auto flex justify-end">
@@ -136,10 +158,17 @@ export default function RaidQuiz({ lessonData, hunterId, onComplete, onEnterBoss
                 disabled={!selectedOptId}
                 className="bg-white text-black font-bold uppercase tracking-widest text-sm px-8 py-4 rounded-sm hover:bg-gray-200 transition-colors shadow-[0_0_15px_rgba(255,255,255,0.5)] disabled:opacity-50 disabled:shadow-none"
               >
-                {currentQIdx < lessonData.quiz.length - 1 ? "Next Area" : "Submit Raid Log"}
+                {currentQIdx < lessonData.quiz.length - 1 ? "Next Area" : "Analyze Performance"}
               </button>
             </div>
           </motion.div>
+        )}
+
+        {phase === "stats" && (
+          <QuizStats 
+            results={performanceStats} 
+            onProceed={handleSubmitToBackend} 
+          />
         )}
 
         {phase === "submitting" && (

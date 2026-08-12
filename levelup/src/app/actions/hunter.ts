@@ -41,13 +41,15 @@ export async function getUserProfileAction(
       hunter = mockDb.hunters.get(hunterId) || {
         id: hunterId,
         username: 'CodeNinja99',
-        level: 5,
-        mana_xp: 1240,
-        current_streak: 7,
-        highest_streak: 14,
+        level: 1,
+        mana_xp: 0,
+        current_streak: 1,
+        highest_streak: 1,
         hunter_class: 'E-Rank Hunter',
         last_login_date: new Date().toISOString(),
         created_at: new Date().toISOString(),
+        total_answered: 0,
+        unlocked_badges: [],
       };
     }
 
@@ -70,20 +72,7 @@ export async function getUserProfileAction(
           currentStreak: streakStatus.currentStreak,
           highestStreak: hunter.highest_streak,
         },
-        badges: [
-          {
-            badgeId: 'bdg_001',
-            name: 'First Blood',
-            iconUrl: '/badges/first.png',
-            description: 'Cleared your first Gate in the System!',
-          },
-          {
-            badgeId: 'bdg_005',
-            name: '7-Day Scholar',
-            iconUrl: '/badges/7-day-streak.png',
-            description: 'Maintained a learning streak for 7 consecutive days!',
-          },
-        ],
+        badges: hunter.unlocked_badges.map(id => ({ badgeId: id })),
         needsPenaltyZone: streakStatus.needsPenaltyZone,
       },
     };
