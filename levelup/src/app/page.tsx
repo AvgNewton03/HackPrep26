@@ -3,9 +3,11 @@
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import SystemHUD from "@/components/layout/SystemHUD";
+import Sidebar from "@/components/layout/Sidebar";
 import Dashboard from "@/components/views/Dashboard";
 import RaidQuiz from "@/components/views/RaidQuiz";
 import BossFight from "@/components/views/BossFight";
+import Leaderboard from "@/components/views/Leaderboard";
 
 // Import Server Actions
 import { getUserProfileAction } from "@/app/actions/hunter";
@@ -23,7 +25,7 @@ export default function Home() {
   const [answerStreak, setAnswerStreak] = useState(0);
   const [unlockedBadges, setUnlockedBadges] = useState<string[]>([]);
   
-  const [activeView, setActiveView] = useState<"dashboard" | "quiz" | "boss-fight">("dashboard");
+  const [activeView, setActiveView] = useState<"dashboard" | "quiz" | "boss-fight" | "leaderboard">("dashboard");
   const [activeTopicId, setActiveTopicId] = useState<string | null>(null);
   
   const [isLoadingLLM, setIsLoadingLLM] = useState(false);
@@ -35,7 +37,7 @@ export default function Home() {
         const res = await getUserProfileAction(hunterId);
         if (res.success && res.data) {
           setXp(res.data.stats.totalXp);
-          setLevel(res.data.stats.level);
+          setLevel(res.data.stats.currentLevel);
           setDailyStreak(res.data.stats.currentStreak);
           setAnswerStreak(res.data.stats.highestStreak);
           setUnlockedBadges(res.data.badges.map((b: any) => b.badgeId));
@@ -126,8 +128,10 @@ export default function Home() {
         answerStreak={answerStreak}
       />
 
-      <div className="flex-1 relative overflow-hidden">
-        {isLoadingLLM && (
+      <div className="flex flex-1 relative overflow-hidden">
+        <Sidebar activeView={activeView} setActiveView={setActiveView} />
+        <div className="flex-1 relative overflow-hidden">
+          {isLoadingLLM && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
             <motion.div 
               initial={{ opacity: 0, scale: 0.8 }}
@@ -193,7 +197,20 @@ export default function Home() {
               />
             </motion.div>
           )}
+
+          {activeView === "leaderboard" && (
+            <motion.div 
+              key="leaderboard"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="absolute inset-0 overflow-y-auto custom-scrollbar"
+            >
+              <Leaderboard />
+            </motion.div>
+          )}
         </AnimatePresence>
+        </div>
       </div>
     </main>
   );

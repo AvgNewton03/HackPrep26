@@ -19,7 +19,7 @@ export default function BossFight({ topic, onVictory, onDefeat }: BossFightProps
   ]);
   const [inputMessage, setInputMessage] = useState("");
   const [isBossTyping, setIsBossTyping] = useState(false);
-  const [fightConcluded, setFightConcluded] = useState<"victory" | "defeat" | null>(null);
+  const [fightConcluded, setFightConcluded] = useState<"victory" | "defeat" | "flee" | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -90,7 +90,16 @@ export default function BossFight({ topic, onVictory, onDefeat }: BossFightProps
       className="max-w-4xl mx-auto w-full p-8 relative flex flex-col h-[calc(100vh-100px)]"
     >
       {/* HP HUD */}
-      <div className="flex justify-between items-center mb-8 bg-black/60 backdrop-blur-md p-4 rounded-sm border border-[#333]">
+      <div className="flex justify-between items-center mb-8 bg-black/60 backdrop-blur-md p-4 rounded-sm border border-[#333] relative">
+        <button
+          onClick={() => {
+            setFightConcluded("flee");
+            setTimeout(onDefeat, 2500);
+          }}
+          className="absolute -top-12 right-0 px-4 py-2 text-xs font-mono font-bold tracking-widest border border-red-900 text-red-500 hover:bg-red-950 rounded-sm transition-all shadow-[0_0_10px_rgba(220,38,38,0.2)]"
+        >
+          GIVE UP WIMSICLE
+        </button>
         <div className="flex-1 mr-8">
           <div className="flex justify-between mb-2">
             <span className="font-bold text-[#ff003c] tracking-widest uppercase">Boss HP</span>
@@ -163,7 +172,15 @@ export default function BossFight({ topic, onVictory, onDefeat }: BossFightProps
             animate={{ opacity: 1 }}
             className="absolute inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md"
           >
-            {fightConcluded === 'victory' ? (
+            {fightConcluded === 'flee' ? (
+              <motion.div 
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="text-center bg-black/80 p-8 border border-red-900 rounded-lg shadow-[0_0_30px_rgba(220,38,38,0.3)]"
+              >
+                <p className="text-2xl text-red-500 font-mono tracking-widest uppercase">System: The Hunter fled the dungeon in fear.</p>
+              </motion.div>
+            ) : fightConcluded === 'victory' ? (
               <div className="text-center">
                 <h1 className="text-5xl font-bold text-[#00e5ff] tracking-[0.3em] mb-6 shadow-[0_0_40px_#00e5ff] py-4">SHADOW EXTRACTED</h1>
                 <p className="text-xl text-white mb-12">Boss Defeated. Massive Mana Boost Awarded!</p>

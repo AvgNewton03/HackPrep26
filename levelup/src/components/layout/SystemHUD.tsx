@@ -25,7 +25,7 @@ export default function SystemHUD({ xp, level, dailyStreak, answerStreak }: Syst
           </div>
           <div>
             <h1 className="text-xl font-bold text-white tracking-widest font-mono">
-              Sung Jin-Woo <span className="text-[#808080] text-sm">(Necromancer)</span>
+              Rishi Bhanushali <span className="text-[#808080] text-sm">(Necromancer)</span>
             </h1>
             <p className="text-[#00e5ff] text-sm font-bold uppercase tracking-widest">Level {level} Hunter</p>
           </div>
