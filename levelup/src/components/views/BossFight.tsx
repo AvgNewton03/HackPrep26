@@ -89,17 +89,21 @@ export default function BossFight({ topic, onVictory, onDefeat }: BossFightProps
       exit={{ opacity: 0 }}
       className="max-w-4xl mx-auto w-full p-8 relative flex flex-col h-[calc(100vh-100px)]"
     >
-      {/* HP HUD */}
-      <div className="flex justify-between items-center mb-8 bg-black/60 backdrop-blur-md p-4 rounded-sm border border-[#333] relative">
+      {/* Header Actions */}
+      <div className="flex justify-end mb-4">
         <button
           onClick={() => {
             setFightConcluded("flee");
             setTimeout(onDefeat, 2500);
           }}
-          className="absolute -top-12 right-0 px-4 py-2 text-xs font-mono font-bold tracking-widest border border-red-900 text-red-500 hover:bg-red-950 rounded-sm transition-all shadow-[0_0_10px_rgba(220,38,38,0.2)]"
+          className="px-4 py-2 text-xs font-mono font-bold tracking-widest border border-red-900 text-red-500 hover:bg-red-950 rounded-sm transition-all shadow-[0_0_10px_rgba(220,38,38,0.2)]"
         >
           GIVE UP WIMSICLE
         </button>
+      </div>
+
+      {/* HP HUD */}
+      <div className="flex justify-between items-center mb-8 bg-black/60 backdrop-blur-md p-4 rounded-sm border border-[#333] relative">
         <div className="flex-1 mr-8">
           <div className="flex justify-between mb-2">
             <span className="font-bold text-[#ff003c] tracking-widest uppercase">Boss HP</span>
