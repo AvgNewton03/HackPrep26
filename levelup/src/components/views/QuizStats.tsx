@@ -155,7 +155,7 @@ export default function QuizStats({ results, onProceed }: QuizStatsProps) {
                     color: "#fff",
                     fontFamily: "monospace",
                   }}
-                  formatter={(value: number) => [`${value}s`, "Time Taken"]}
+                  formatter={(value: any) => [`${value}s`, "Time Taken"]}
                 />
                 <Bar dataKey="timeTaken" radius={[2, 2, 0, 0]}>
                   {barData.map((entry, index) => (

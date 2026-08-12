@@ -63,7 +63,7 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
     __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);
 }
 }),
-"[project]/src/app/actions/data:fd54b1 [app-client] (ecmascript) <text/javascript>", ((__turbopack_context__) => {
+"[project]/src/app/actions/data:aa4f42 [app-client] (ecmascript) <text/javascript>", ((__turbopack_context__) => {
 "use strict";
 
 __turbopack_context__.s([
@@ -100,7 +100,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$views$2
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$views$2f$CustomQuest$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/views/CustomQuest.tsx [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$views$2f$RecentHunts$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/views/RecentHunts.tsx [app-client] (ecmascript)");
 // Import Server Actions
-var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f$actions$2f$data$3a$fd54b1__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$text$2f$javascript$3e$__ = __turbopack_context__.i("[project]/src/app/actions/data:fd54b1 [app-client] (ecmascript) <text/javascript>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f$actions$2f$data$3a$aa4f42__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$text$2f$javascript$3e$__ = __turbopack_context__.i("[project]/src/app/actions/data:aa4f42 [app-client] (ecmascript) <text/javascript>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f$actions$2f$data$3a$0fec32__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$text$2f$javascript$3e$__ = __turbopack_context__.i("[project]/src/app/actions/data:0fec32 [app-client] (ecmascript) <text/javascript>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f$actions$2f$data$3a$8e3ef3__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$text$2f$javascript$3e$__ = __turbopack_context__.i("[project]/src/app/actions/data:8e3ef3 [app-client] (ecmascript) <text/javascript>");
 // Import gamification helpers
@@ -143,7 +143,7 @@ function Home() {
             const fetchProfile = {
                 "Home.useEffect.fetchProfile": async ()=>{
                     try {
-                        const res = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f$actions$2f$data$3a$fd54b1__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$text$2f$javascript$3e$__["getUserProfileAction"])(hunterId);
+                        const res = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f$actions$2f$data$3a$aa4f42__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$text$2f$javascript$3e$__["getUserProfileAction"])(hunterId);
                         if (res.success && res.data) {
                             setXp(res.data.stats.totalXp);
                             setLevel(res.data.stats.currentLevel);
@@ -5336,4 +5336,4 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
 }),
 ]);
 
-//# sourceMappingURL=src_0f23z64._.js.map
+//# sourceMappingURL=src_17xipae._.js.map

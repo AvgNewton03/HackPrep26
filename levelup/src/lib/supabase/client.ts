@@ -28,6 +28,8 @@ export const mockDb = {
         hunter_class: 'E-Rank Hunter',
         last_login_date: new Date().toISOString(),
         created_at: new Date().toISOString(),
+        total_answered: 0,
+        unlocked_badges: [],
       },
     ],
     [
@@ -42,6 +44,8 @@ export const mockDb = {
         hunter_class: 'National Level Hunter',
         last_login_date: new Date().toISOString(),
         created_at: new Date().toISOString(),
+        total_answered: 500,
+        unlocked_badges: ['shadow-monarch'],
       },
     ],
   ]),

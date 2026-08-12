@@ -72,7 +72,12 @@ export async function getUserProfileAction(
           currentStreak: streakStatus.currentStreak,
           highestStreak: hunter.highest_streak,
         },
-        badges: hunter.unlocked_badges.map(id => ({ badgeId: id })),
+        badges: hunter.unlocked_badges.map(id => ({
+          badgeId: id,
+          name: id,
+          iconUrl: `/badges/${id}.png`,
+          description: `Badge ${id}`
+        })),
         needsPenaltyZone: streakStatus.needsPenaltyZone,
       },
     };

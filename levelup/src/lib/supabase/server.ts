@@ -4,7 +4,7 @@ import { mockDb, isSupabaseConfigured, supabase } from './client';
 
 export { mockDb, isSupabaseConfigured, supabase };
 
-export function createSupabaseServerClient() {
+export async function createSupabaseServerClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   const supabaseAnonKey =
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
@@ -15,7 +15,7 @@ export function createSupabaseServerClient() {
     return null;
   }
 
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
 
   return createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {

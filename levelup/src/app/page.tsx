@@ -29,7 +29,7 @@ export default function Home() {
   const [answerStreak, setAnswerStreak] = useState(0);
   const [unlockedBadges, setUnlockedBadges] = useState<string[]>([]);
   
-  const [activeView, setActiveView] = useState<"dashboard" | "quiz" | "boss-fight" | "leaderboard" | "penalty" | "custom-quest">("dashboard");
+  const [activeView, setActiveView] = useState<"dashboard" | "quiz" | "boss-fight" | "leaderboard" | "penalty" | "custom-quest" | "recent-hunts">("dashboard");
   const [activeTopicId, setActiveTopicId] = useState<string | null>(null);
   const [customTopic, setCustomTopic] = useState<string>("");
   
