@@ -73,6 +73,12 @@ export const badges: Badge[] = [
     name: "Awakened",
     description: "Reach Level 5 (500 XP).",
     condition: (stats) => stats.xp >= 500,
+  },
+  {
+    id: "shadow-monarch",
+    name: "Shadow Monarch",
+    description: "Defeat a Dungeon Boss.",
+    condition: (stats) => false, // Awarded manually via BossFight victory
   }
 ];
 

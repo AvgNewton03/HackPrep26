@@ -3,11 +3,11 @@
 import { motion } from "framer-motion";
 import { topics, badges } from "@/lib/mockData";
 import { twMerge } from "tailwind-merge";
-import { Lock, ShieldAlert } from "lucide-react";
+import { Lock, ShieldAlert, Flame } from "lucide-react";
 
 interface DashboardProps {
   unlockedBadges: string[];
-  onSelectTopic: (topicId: string) => void;
+  onSelectTopic: (topicId: string, topicName: string, rank: string) => void;
 }
 
 const rankColors: Record<string, string> = {
@@ -58,7 +58,7 @@ export default function Dashboard({ unlockedBadges, onSelectTopic }: DashboardPr
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
                 whileHover={{ y: -5 }}
-                onClick={() => onSelectTopic(topic.id)}
+                onClick={() => onSelectTopic(topic.id, topic.title, topic.rank)}
                 className="bg-black/60 backdrop-blur-md p-6 border border-[#333] hover:border-[#00e5ff] rounded-sm cursor-pointer flex flex-col h-56 transition-all hover:shadow-[0_0_20px_rgba(0,229,255,0.2)] relative"
               >
                 <div className={twMerge("absolute top-0 right-0 px-3 py-1 text-xs font-bold font-mono border-b border-l rounded-bl-sm bg-black/80", rankStyle)}>
