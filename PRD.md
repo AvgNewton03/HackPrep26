@@ -1,6 +1,6 @@
 # Product Requirements Document (PRD): "LevelUp" – Project Arise
 
-**Project Name:** LevelUp (Theme: *Solo Leveling*)
+**Project Name:** EduLeveling (Theme: *Solo Leveling*)
 **Platform:** Web Application (Desktop-optimized, mobile-responsive)
 **Core Tech Stack:** Next.js (App Router), Supabase (Auth & PostgreSQL database), Tailwind CSS, Framer Motion (Animations), LLM API (OpenAI/Gemini)
 **Objective:** To build a highly gamified, visually striking EdTech platform that leverages LLM-generated content to make learning feel like clearing dungeons in the *Solo Leveling* universe.
