@@ -1,0 +1,186 @@
+# LevelUp Network Communication Architecture (API Contracts)
+
+## 1. Generate Lesson & Quiz Content
+Endpoint: POST /api/lessons/generate
+Purpose: Takes the user's selected topic, triggers the LLM on the backend, and returns the lesson and quiz questions.
+
+### Request Payload
+```json
+{
+  "topic": "React Hooks",
+  "difficulty": "beginner",
+  "isDailyChallenge": false
+}
+```
+
+### Response Payload
+```json
+{
+  "success": true,
+  "data": {
+    "lessonId": "lsn_987654321",
+    "topic": "React Hooks",
+    "lessonContent": "React Hooks are functions that let you 'hook into' React state and lifecycle features from function components...",
+    "quiz": [
+      {
+        "questionId": "q_101",
+        "question": "Which hook is used to manage side effects?",
+        "options": [
+          { "optionId": "opt_a", "text": "useState" },
+          { "optionId": "opt_b", "text": "useEffect" },
+          { "optionId": "opt_c", "text": "useContext" },
+          { "optionId": "opt_d", "text": "useReducer" }
+        ]
+      }
+    ]
+  }
+}
+```
+
+## 2. Submit Quiz & Calculate Gamification
+Endpoint: POST /api/quiz/submit
+Purpose: Validates the user's answers on the server, calculates XP, updates streaks, checks for level-ups/badges, and returns the results.
+
+### Request Payload
+```json
+{
+  "lessonId": "lsn_987654321",
+  "answers": [
+    { "questionId": "q_101", "selectedOptionId": "opt_b" },
+    { "questionId": "q_102", "selectedOptionId": "opt_a" }
+  ],
+  "timeTakenSeconds": 45
+}
+```
+
+### Response Payload
+```json
+{
+  "success": true,
+  "data": {
+    "score": 4,
+    "totalQuestions": 5,
+    "results": [
+      {
+        "questionId": "q_101",
+        "isCorrect": true,
+        "correctOptionId": "opt_b"
+      },
+      {
+        "questionId": "q_102",
+        "isCorrect": false,
+        "correctOptionId": "opt_c"
+      }
+    ],
+    "gamificationUpdates": {
+      "xpGained": 40,
+      "totalXp": 1240,
+      "currentLevel": 5,
+      "levelUpTriggered": true,
+      "streak": {
+        "currentStreak": 7,
+        "streakMaintained": true
+      },
+      "newBadges": [
+        {
+          "badgeId": "bdg_005",
+          "name": "7-Day Scholar",
+          "iconUrl": "/badges/7-day-streak.png",
+          "description": "Maintained a learning streak for 7 consecutive days!"
+        }
+      ]
+    },
+    "nextRecommendedDifficulty": "intermediate"
+  }
+}
+```
+
+## 3. LLM "Explain Why I'm Wrong" (Bonus)
+Endpoint: POST /api/quiz/explain
+Purpose: If the user gets a question wrong, they can click "Explain this", which prompts the LLM to explain the misconception.
+
+### Request Payload
+```json
+{
+  "lessonId": "lsn_987654321",
+  "questionId": "q_102",
+  "userSelectedOptionId": "opt_a"
+}
+```
+
+### Response Payload
+```json
+{
+  "success": true,
+  "data": {
+    "explanation": "You selected 'useState', but 'useState' is only for managing local state. The correct answer is 'useEffect' because fetching data from an external API is considered a side effect, which must be handled after the component renders."
+  }
+}
+```
+
+## 4. Fetch User Profile & Progress
+Endpoint: GET /api/users/profile
+Purpose: Fetches the user's current gamification stats on initial page load to ensure persistence across refreshes.
+
+### Response Payload
+```json
+{
+  "success": true,
+  "data": {
+    "userId": "usr_12345",
+    "username": "CodeNinja99",
+    "stats": {
+      "totalXp": 1240,
+      "currentLevel": 5,
+      "xpToNextLevel": 260,
+      "currentStreak": 7,
+      "highestStreak": 14
+    },
+    "badges": [
+      {
+        "badgeId": "bdg_001",
+        "name": "First Blood",
+        "iconUrl": "/badges/first.png"
+      },
+      {
+        "badgeId": "bdg_005",
+        "name": "7-Day Scholar",
+        "iconUrl": "/badges/7-day-streak.png"
+      }
+    ]
+  }
+}
+```
+
+## 5. Fetch Leaderboard
+Endpoint: GET /api/leaderboard
+Purpose: Fetches the top users based on XP (can include mock data if user base is small).
+Request (Query Params): ?timeframe=weekly&limit=10
+
+### Response Payload
+```json
+{
+  "success": true,
+  "data": {
+    "timeframe": "weekly",
+    "leaderboard": [
+      {
+        "rank": 1,
+        "username": "ReactGod",
+        "level": 12,
+        "totalXp": 4500,
+        "avatarUrl": "/avatars/1.png",
+        "isCurrentUser": false
+      },
+      {
+        "rank": 2,
+        "username": "CodeNinja99",
+        "level": 5,
+        "totalXp": 1240,
+        "avatarUrl": "/avatars/5.png",
+        "isCurrentUser": true
+      }
+    ]
+  }
+}
+```
