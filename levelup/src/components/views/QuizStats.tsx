@@ -1,6 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   PieChart,
   Pie,
@@ -13,12 +14,16 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, CheckCircle2, XCircle, X } from "lucide-react";
 
 export interface QuizResultData {
   questionIndex: number;
+  questionId: string;
   isCorrect: boolean;
   timeTaken: number; // in seconds
+  questionText: string;
+  correctOptionText: string;
+  selectedOptionText?: string;
 }
 
 interface QuizStatsProps {
@@ -27,6 +32,7 @@ interface QuizStatsProps {
 }
 
 export default function QuizStats({ results, onProceed }: QuizStatsProps) {
+  const [showReview, setShowReview] = useState(false);
   const correctCount = results.filter((r) => r.isCorrect).length;
   const incorrectCount = results.length - correctCount;
 
@@ -179,7 +185,13 @@ export default function QuizStats({ results, onProceed }: QuizStatsProps) {
         </div>
       </div>
 
-      <div className="mt-auto flex justify-end">
+      <div className="mt-auto flex justify-end gap-4">
+        <button
+          onClick={() => setShowReview(true)}
+          className="bg-transparent border border-[#00e5ff] text-[#00e5ff] hover:bg-[#00e5ff] hover:text-black font-bold uppercase tracking-widest text-sm px-6 py-4 rounded-sm transition-colors shadow-[0_0_15px_rgba(0,229,255,0.2)] hover:shadow-[0_0_25px_rgba(0,229,255,0.5)] flex items-center gap-2 opacity-80"
+        >
+          Review Question Solutions &gt;
+        </button>
         <button
           onClick={onProceed}
           className="bg-transparent border border-[#ff003c] text-[#ff003c] hover:bg-[#ff003c] hover:text-black font-bold uppercase tracking-widest text-sm px-8 py-4 rounded-sm transition-colors shadow-[0_0_15px_rgba(255,0,60,0.2)] hover:shadow-[0_0_25px_rgba(255,0,60,0.5)] flex items-center gap-2"
@@ -187,6 +199,69 @@ export default function QuizStats({ results, onProceed }: QuizStatsProps) {
           Proceed to Boss Room <ChevronRight size={18} />
         </button>
       </div>
+
+      <AnimatePresence>
+        {showReview && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.95 }}
+              className="bg-black border border-[#333] shadow-[0_0_30px_rgba(0,229,255,0.1)] w-full max-w-4xl max-h-[80vh] flex flex-col rounded-sm overflow-hidden"
+            >
+              <div className="flex items-center justify-between p-6 border-b border-[#333] bg-[#0a0a0a]">
+                <h2 className="text-xl text-[#00e5ff] font-bold tracking-[0.2em] uppercase" style={{ textShadow: "0 0 10px rgba(0,229,255,0.5)" }}>
+                  DETAILED QUESTION FEEDBACK
+                </h2>
+                <button
+                  onClick={() => setShowReview(false)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+              <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-6">
+                {results.map((r, i) => (
+                  <div key={i} className="border border-[#222] bg-[#111] p-5 rounded-sm flex flex-col gap-3">
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0 mt-1">
+                        {r.isCorrect ? (
+                          <CheckCircle2 className="text-[#00e5ff] drop-shadow-[0_0_8px_rgba(0,229,255,0.8)]" size={24} />
+                        ) : (
+                          <XCircle className="text-[#ff003c] drop-shadow-[0_0_8px_rgba(255,0,60,0.8)]" size={24} />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-xs text-gray-500 font-mono tracking-widest uppercase mb-1">
+                          Question {i + 1}
+                        </div>
+                        <div className="text-lg text-gray-200 mb-4">{r.questionText}</div>
+                        
+                        {!r.isCorrect && (
+                          <div className="mb-3">
+                            <div className="text-xs text-[#ff003c] font-mono tracking-widest uppercase mb-1">Your Incorrect Selection</div>
+                            <div className="bg-[#ff003c]/10 border border-[#ff003c]/30 text-gray-300 p-3 rounded-sm">{r.selectedOptionText}</div>
+                          </div>
+                        )}
+                        
+                        <div>
+                          <div className="text-xs text-[#00e5ff] font-mono tracking-widest uppercase mb-1">Correct Answer</div>
+                          <div className="bg-[#00e5ff]/10 border border-[#00e5ff]/30 text-gray-300 p-3 rounded-sm">{r.correctOptionText}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

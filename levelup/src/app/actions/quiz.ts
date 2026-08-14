@@ -51,7 +51,10 @@ export async function submitQuizAction(
       results.push({
         questionId: q.questionId,
         isCorrect,
-        correctOptionId: q.correctOptionId,
+        correctOptionId: q.correctOptionId || '',
+        questionText: q.question,
+        correctOptionText: q.options.find(o => o.optionId === q.correctOptionId)?.text || '',
+        selectedOptionText: (!isCorrect && userAnswer) ? q.options.find(o => o.optionId === userAnswer.selectedOptionId)?.text : undefined,
       });
     });
 

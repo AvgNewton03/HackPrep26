@@ -51,6 +51,9 @@ export interface QuestionResult {
   questionId: string;
   isCorrect: boolean;
   correctOptionId: string;
+  questionText: string;
+  correctOptionText: string;
+  selectedOptionText?: string;
 }
 
 export interface Badge {

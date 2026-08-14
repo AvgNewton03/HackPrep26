@@ -39,47 +39,45 @@ export default function RaidQuiz({ lessonData, hunterId, onComplete, onEnterBoss
 
   const handleNext = async () => {
     if (selectedOptId) {
-      setAnswers(prev => [...prev, { questionId: currentQ.questionId, selectedOptionId: selectedOptId }]);
-      
       const now = Date.now();
       const timeTaken = Math.floor((now - questionStartTime) / 1000);
-      const isCorrect = currentQ.correctAnswer === parseInt(selectedOptId.replace('opt_', '')) - 1; // Basic mock logic, but since we rely on backend for actual score, we just check if it matches the correctAnswer index on client for stats. Wait, the frontend `currentQ.correctAnswer` has the exact index. The `selectedOptId` is `opt_1`, `opt_2`, etc.
-      const selectedIndex = parseInt(selectedOptId.replace('opt_', '')) - 1;
       
+      setAnswers(prev => [...prev, { questionId: currentQ.questionId, selectedOptionId: selectedOptId }]);
       setPerformanceStats(prev => [
         ...prev,
-        { questionIndex: currentQIdx, isCorrect: selectedIndex === currentQ.correctAnswer, timeTaken }
+        { questionIndex: currentQIdx, isCorrect: false, timeTaken } as any // isCorrect handled by backend
       ]);
       setQuestionStartTime(now);
-    }
-    
-    if (currentQIdx < lessonData.quiz.length - 1) {
-      setCurrentQIdx(prev => prev + 1);
-      setSelectedOptId(null);
-    } else {
-      setPhase("stats");
+      
+      if (currentQIdx < lessonData.quiz.length - 1) {
+        setCurrentQIdx(prev => prev + 1);
+        setSelectedOptId(null);
+      } else {
+        // Last question: submit to backend
+        setPhase("submitting");
+        const totalTimeTaken = Math.floor((Date.now() - startTime) / 1000);
+        const allAnswers = [...answers, { questionId: currentQ.questionId, selectedOptionId: selectedOptId }];
+        try {
+          const results = await onComplete(allAnswers, totalTimeTaken);
+          setQuizResults(results);
+          setPhase("stats");
+        } catch (err) {
+          alert("Failed to submit to system.");
+          onBack();
+        }
+      }
     }
   };
 
-  const handleSubmitToBackend = async () => {
-    setPhase("submitting");
-      const timeTaken = Math.floor((Date.now() - startTime) / 1000);
-      
-      const allAnswers = [...answers, { questionId: currentQ.questionId, selectedOptionId: selectedOptId }];
-      
-    try {
-      const results = await onComplete(allAnswers, timeTaken);
-      setQuizResults(results);
-      if (results.score >= 2) {
-        setPhase("boss-warning");
-      } else {
-        setPhase("cleared");
-      }
-    } catch (err) {
-      alert("Failed to submit to system.");
-      onBack();
+  const handleProceedFromStats = () => {
+    if (quizResults?.score >= 2) {
+      setPhase("boss-warning");
+    } else {
+      setPhase("cleared");
     }
   };
+
+
 
   const handleSelect = (optId: string) => {
     setSelectedOptId(optId);
@@ -166,8 +164,12 @@ export default function RaidQuiz({ lessonData, hunterId, onComplete, onEnterBoss
 
         {phase === "stats" && (
           <QuizStats 
-            results={performanceStats} 
-            onProceed={handleSubmitToBackend} 
+            results={quizResults?.results?.map((r: any, idx: number) => ({
+              ...r,
+              questionIndex: idx,
+              timeTaken: performanceStats[idx]?.timeTaken || 0
+            }))} 
+            onProceed={handleProceedFromStats} 
           />
         )}
 
