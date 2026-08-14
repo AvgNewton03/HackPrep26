@@ -33,8 +33,8 @@ export async function middleware(request: NextRequest) {
 
   const isAuthRoute = request.nextUrl.pathname.startsWith('/login')
   
-  // Protect all routes except /login and api routes/assets
-  const isProtectedRoute = !isAuthRoute && !request.nextUrl.pathname.startsWith('/api')
+  // Protect all routes except /login and api routes/assets/callbacks
+  const isProtectedRoute = !isAuthRoute && !request.nextUrl.pathname.startsWith('/api') && !request.nextUrl.pathname.startsWith('/auth')
 
   if (!user && isProtectedRoute) {
     const url = request.nextUrl.clone()
