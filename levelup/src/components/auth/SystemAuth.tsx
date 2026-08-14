@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Mail, Lock, AlertCircle, ShieldAlert, CheckCircle2 } from 'lucide-react'
 import { login, signup, resetPassword } from '@/app/auth/actions'
@@ -13,6 +13,21 @@ export default function SystemAuth() {
   const [success, setSuccess] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
+  const [typewriterText, setTypewriterText] = useState('')
+  const fullText = "System Notification: A suitable vessel has been found."
+
+  useEffect(() => {
+    let i = 0
+    const timer = setInterval(() => {
+      if (i < fullText.length) {
+        setTypewriterText(fullText.slice(0, i + 1))
+        i++
+      } else {
+        clearInterval(timer)
+      }
+    }, 50)
+    return () => clearInterval(timer)
+  }, [])
 
   const handleViewChange = (newView: AuthView) => {
     setView(newView)
@@ -70,6 +85,12 @@ export default function SystemAuth() {
           <div className="w-12 h-12 border-2 border-[#00e5ff] rounded-sm flex items-center justify-center shadow-[0_0_15px_rgba(0,229,255,0.4)] animate-pulse">
             <span className="text-[#00e5ff] font-mono font-bold text-xl">SYS</span>
           </div>
+        </div>
+
+        <div className="mb-6 h-6 text-center">
+          <p className="text-[#00e5ff] font-mono text-xs md:text-sm tracking-widest uppercase">
+            {typewriterText}<span className="animate-pulse">_</span>
+          </p>
         </div>
 
         <motion.h2 

@@ -67,7 +67,7 @@ export async function getUserProfileAction(
       data: {
         userId: hunter.id,
         username: hunter.username,
-        hunterClass: determineHunterClass(hunter.mana_xp),
+        hunterClass: hunter.hunter_class && !hunter.hunter_class.includes("-Rank") ? hunter.hunter_class : determineHunterClass(hunter.mana_xp),
         stats: {
           totalXp: hunter.mana_xp,
           currentLevel: hunter.level,
@@ -211,5 +211,39 @@ export async function verifyPenaltyAction(
       success: false,
       error: err.message || "Failed to verify penalty zone",
     };
+  }
+}
+
+export async function updateHunterProfileAction(
+  hunterId: string,
+  data: { username?: string; hunterClass?: any }
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const hunter = mockDb.hunters.get(hunterId);
+    if (hunter) {
+      if (data.username) hunter.username = data.username;
+      if (data.hunterClass) hunter.hunter_class = data.hunterClass;
+    }
+
+    if (isSupabaseConfigured && supabase) {
+      const updates: any = {};
+      if (data.username) updates.username = data.username;
+      if (data.hunterClass) updates.hunter_class = data.hunterClass;
+      
+      try {
+        const { error } = await supabase
+          .from("hunters")
+          .update(updates)
+          .eq("id", hunterId);
+          
+        if (error) throw error;
+      } catch (err) {
+        console.warn("Supabase profile update failed:", err);
+      }
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message || "Failed to update profile" };
   }
 }

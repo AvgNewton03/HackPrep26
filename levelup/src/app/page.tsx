@@ -11,6 +11,7 @@ import Leaderboard from "@/components/views/Leaderboard";
 import PenaltyZone from "@/components/views/PenaltyZone";
 import CustomQuest from "@/components/views/CustomQuest";
 import RecentHunts from "@/components/views/RecentHunts";
+import Profile from "@/components/views/Profile";
 
 // Import Server Actions
 import { getUserProfileAction } from "@/app/actions/hunter";
@@ -28,8 +29,9 @@ export default function Home() {
   const [dailyStreak, setDailyStreak] = useState(0);
   const [answerStreak, setAnswerStreak] = useState(0);
   const [unlockedBadges, setUnlockedBadges] = useState<string[]>([]);
+  const [username, setUsername] = useState("Hunter");
   
-  const [activeView, setActiveView] = useState<"dashboard" | "quiz" | "boss-fight" | "leaderboard" | "penalty" | "custom-quest" | "recent-hunts">("dashboard");
+  const [activeView, setActiveView] = useState<"dashboard" | "quiz" | "boss-fight" | "leaderboard" | "penalty" | "custom-quest" | "recent-hunts" | "profile">("dashboard");
   const [activeTopicId, setActiveTopicId] = useState<string | null>(null);
   const [customTopic, setCustomTopic] = useState<string>("");
   
@@ -42,6 +44,7 @@ export default function Home() {
       try {
         const res = await getUserProfileAction(hunterId);
         if (res.success && res.data) {
+          setUsername(res.data.username || "Hunter");
           setXp(res.data.stats.totalXp);
           setLevel(res.data.stats.currentLevel);
           setHunterClass(res.data.hunterClass);
@@ -163,6 +166,8 @@ export default function Home() {
       <div className="absolute top-0 z-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[radial-gradient(circle_at_center,#00e5ff15,transparent_60%)] blur-3xl pointer-events-none" />
 
       <SystemHUD 
+        username={username}
+        hunterClass={hunterClass}
         xp={xp}
         level={level}
         dailyStreak={dailyStreak}
@@ -250,6 +255,7 @@ export default function Home() {
               className="absolute inset-0 overflow-y-auto custom-scrollbar"
             >
               <Leaderboard 
+                currentUsername={username}
                 currentLevel={level}
                 currentClass={hunterClass}
               />
@@ -311,6 +317,32 @@ export default function Home() {
                   }
                   setCustomTopic("");
                   setActiveView("dashboard");
+                }}
+              />
+            </motion.div>
+          )}
+
+          {activeView === "profile" && (
+            <motion.div 
+              key="profile"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="absolute inset-0 overflow-y-auto custom-scrollbar"
+            >
+              <Profile 
+                hunterId={hunterId}
+                onProfileUpdate={(newUsername) => {
+                  setUsername(newUsername);
+                }}
+                stats={{
+                  username,
+                  hunterClass,
+                  currentRank: level >= 50 ? "S-Rank" : level >= 40 ? "A-Rank" : level >= 30 ? "B-Rank" : level >= 20 ? "C-Rank" : level >= 10 ? "D-Rank" : "E-Rank",
+                  totalXp: xp,
+                  gatesCleared: Math.floor(xp / 100),
+                  highestStreak: answerStreak,
+                  unlockedBadges
                 }}
               />
             </motion.div>

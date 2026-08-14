@@ -4,13 +4,15 @@ import { motion } from "framer-motion";
 import { User, Flame, Zap, Shield } from "lucide-react";
 
 interface SystemHUDProps {
+  username?: string;
+  hunterClass?: string;
   xp: number;
   level: number;
   dailyStreak: number;
   answerStreak: number;
 }
 
-export default function SystemHUD({ xp, level, dailyStreak, answerStreak }: SystemHUDProps) {
+export default function SystemHUD({ username, hunterClass, xp, level, dailyStreak, answerStreak }: SystemHUDProps) {
   const xpPerLevel = 250;
   const currentLevelXp = xp % xpPerLevel;
   const xpPercentage = (currentLevelXp / xpPerLevel) * 100;
@@ -26,7 +28,7 @@ export default function SystemHUD({ xp, level, dailyStreak, answerStreak }: Syst
           </div>
           <div>
             <h1 className="text-xl font-bold text-white tracking-widest font-mono">
-              Rishi Bhanushali <span className="text-[#808080] text-sm">(Necromancer)</span>
+              {username || "Rishi Bhanushali"} <span className="text-[#808080] text-sm">({hunterClass || "Necromancer"})</span>
             </h1>
             <p className="text-[#00e5ff] text-sm font-bold uppercase tracking-widest">Level {level} Hunter</p>
           </div>

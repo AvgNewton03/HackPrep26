@@ -13,6 +13,7 @@ export default function Sidebar({ activeView, setActiveView }: SidebarProps) {
     { id: "dashboard", label: "Gates", icon: Home },
     { id: "leaderboard", label: "Hunter Association", icon: Trophy },
     { id: "recent-hunts", label: "Recent Hunts", icon: History },
+    { id: "profile", label: "Hunter Status", icon: User },
   ];
 
   return (

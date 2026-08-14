@@ -26,14 +26,15 @@ const mockHunters: Hunter[] = [
 ];
 
 interface LeaderboardProps {
+  currentUsername?: string;
   currentLevel?: number;
   currentClass?: string;
 }
 
-export default function Leaderboard({ currentLevel = 1, currentClass = "E-Rank Hunter" }: LeaderboardProps) {
+export default function Leaderboard({ currentUsername = "Rishi Bhanushali", currentLevel = 1, currentClass = "E-Rank Hunter" }: LeaderboardProps) {
   const currentUser: Hunter = {
     id: "usr_12345",
-    name: "Rishi Bhanushali",
+    name: currentUsername,
     rank: 42,
     class: currentClass,
     level: currentLevel,
