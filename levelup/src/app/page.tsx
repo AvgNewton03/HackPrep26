@@ -24,7 +24,7 @@ import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const [isInitializing, setIsInitializing] = useState(true);
+  const [isAuthenticating, setIsAuthenticating] = useState(true);
   const router = useRouter();
   const supabase = createClient();
   
@@ -67,10 +67,11 @@ export default function Home() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         router.replace('/login');
+        return;
       } else {
         setHunterId(session.user.id);
         await fetchProfile(session.user.id);
-        setIsInitializing(false);
+        setIsAuthenticating(false);
       }
     };
     checkAuth();
@@ -171,17 +172,17 @@ export default function Home() {
     setActiveView("dashboard");
   };
 
-  if (isInitializing) {
+  if (isAuthenticating) {
     return (
       <div className="min-h-screen bg-black flex flex-col items-center justify-center text-center relative overflow-hidden">
         <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,rgba(0,229,255,0.1)_0%,transparent_50%)] animate-pulse" />
         <div className="relative z-10 flex flex-col items-center">
           <div className="w-16 h-16 border-4 border-[#00e5ff] border-t-transparent rounded-full animate-spin mb-6 shadow-[0_0_15px_#00e5ff]" />
           <h1 className="text-[#00e5ff] font-mono text-xl md:text-2xl font-bold tracking-widest uppercase animate-pulse mb-2">
-            SYSTEM INITIALIZATION
+            SYSTEM ACCESS
           </h1>
           <p className="text-gray-400 font-mono text-sm tracking-widest uppercase animate-pulse">
-            Scanning Hunter Signature...
+            Verifying Hunter Signature...
           </p>
         </div>
       </div>

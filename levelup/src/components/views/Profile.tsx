@@ -8,6 +8,7 @@ import EditProfileModal from "@/components/modals/EditProfileModal";
 import UpdateEmailModal from "@/components/modals/UpdateEmailModal";
 import ResetPasswordModal from "@/components/modals/ResetPasswordModal";
 import { updateHunterProfileAction } from "@/app/actions/hunter";
+import { createClient } from "@/utils/supabase/client";
 
 interface ProfileProps {
   stats: {
@@ -30,7 +31,8 @@ export default function Profile({ stats, hunterId, onProfileUpdate }: ProfilePro
   const [isResetKeyOpen, setIsResetKeyOpen] = useState(false);
 
   const handleLogout = async () => {
-    // Perform actual logout logic if wired up, for now redirect
+    const supabase = createClient();
+    await supabase.auth.signOut();
     router.push("/login");
   };
 
