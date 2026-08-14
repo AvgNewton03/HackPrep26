@@ -27,14 +27,16 @@ export default function Sidebar({ activeView, setActiveView }: SidebarProps) {
             <button
               key={item.id}
               onClick={() => setActiveView(item.id)}
-              className={`flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-300 ${
+              className={`flex items-center gap-3 px-4 py-3 w-full rounded-lg transition-colors text-left duration-300 relative overflow-hidden ${
                 isActive
                   ? "bg-cyan-950/50 border border-cyan-500/50 text-[#00e5ff] shadow-[0_0_15px_rgba(0,229,255,0.2)]"
-                  : "text-gray-400 hover:bg-white/5 hover:text-gray-200"
+                  : "text-gray-400 hover:bg-white/5 hover:text-gray-200 border border-transparent"
               }`}
             >
-              <Icon size={20} className={isActive ? "animate-pulse" : ""} />
-              <span className="font-mono text-sm tracking-widest uppercase">{item.label}</span>
+              <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
+                <Icon size={20} className={isActive ? "animate-pulse" : ""} />
+              </div>
+              <span className="text-xs md:text-sm font-semibold tracking-wider whitespace-nowrap font-mono uppercase">{item.label}</span>
               
               {isActive && (
                 <motion.div

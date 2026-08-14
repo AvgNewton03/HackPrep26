@@ -20,9 +20,15 @@ import { submitQuizAction } from "@/app/actions/quiz";
 
 // Import gamification helpers
 import { calculateLevel } from "@/lib/gamification/xp";
+import { createClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const [hunterId] = useState("usr_12345");
+  const [isInitializing, setIsInitializing] = useState(true);
+  const router = useRouter();
+  const supabase = createClient();
+  
+  const [hunterId, setHunterId] = useState("usr_12345");
   const [xp, setXp] = useState(0);
   const [level, setLevel] = useState(1);
   const [hunterClass, setHunterClass] = useState("E-Rank Hunter");
@@ -40,9 +46,9 @@ export default function Home() {
   const [penaltyLessonData, setPenaltyLessonData] = useState<any>(null);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchProfile = async (uid: string) => {
       try {
-        const res = await getUserProfileAction(hunterId);
+        const res = await getUserProfileAction(uid);
         if (res.success && res.data) {
           setUsername(res.data.username || "Hunter");
           setXp(res.data.stats.totalXp);
@@ -56,8 +62,19 @@ export default function Home() {
         console.error("Failed to fetch profile", err);
       }
     };
-    fetchProfile();
-  }, [hunterId]);
+
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.replace('/login');
+      } else {
+        setHunterId(session.user.id);
+        await fetchProfile(session.user.id);
+        setIsInitializing(false);
+      }
+    };
+    checkAuth();
+  }, [router, supabase.auth]);
 
   const handleSelectTopic = async (topicId: string, topicName: string, rank: string) => {
     setIsLoadingLLM(true);
@@ -153,6 +170,23 @@ export default function Home() {
     setCurrentLessonData(null);
     setActiveView("dashboard");
   };
+
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center text-center relative overflow-hidden">
+        <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,rgba(0,229,255,0.1)_0%,transparent_50%)] animate-pulse" />
+        <div className="relative z-10 flex flex-col items-center">
+          <div className="w-16 h-16 border-4 border-[#00e5ff] border-t-transparent rounded-full animate-spin mb-6 shadow-[0_0_15px_#00e5ff]" />
+          <h1 className="text-[#00e5ff] font-mono text-xl md:text-2xl font-bold tracking-widest uppercase animate-pulse mb-2">
+            SYSTEM INITIALIZATION
+          </h1>
+          <p className="text-gray-400 font-mono text-sm tracking-widest uppercase animate-pulse">
+            Scanning Hunter Signature...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-neutral-950 text-white relative overflow-hidden flex flex-col">
