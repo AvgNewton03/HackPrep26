@@ -76,7 +76,15 @@ export default function CustomQuest({ topic, onBack }: CustomQuestProps) {
     
     setQuizResults(prev => [
       ...prev,
-      { questionIndex: currentQIdx, isCorrect, timeTaken }
+      { 
+        questionIndex: currentQIdx, 
+        questionId: String(currentQIdx),
+        isCorrect, 
+        timeTaken,
+        questionText: data.quiz[currentQIdx].question,
+        correctOptionText: data.quiz[currentQIdx].correctAnswer,
+        selectedOptionText: selectedOpt
+      }
     ]);
 
     setSelectedOpt(null);

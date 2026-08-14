@@ -1,25 +1,25 @@
-'use server';
+"use server";
 
-import { mockDb, isSupabaseConfigured, supabase } from '@/lib/supabase/server';
+import { mockDb, isSupabaseConfigured, supabase } from "@/lib/supabase/server";
 import {
   calculateXpToNextLevel,
   determineHunterClass,
-} from '@/lib/gamification/xp';
+} from "@/lib/gamification/xp";
 import {
   evaluateStreakStatus,
   verifyPenaltyQuizResult,
-} from '@/lib/gamification/streak';
+} from "@/lib/gamification/streak";
 import {
   UserProfileResponse,
   LeaderboardResponse,
   VerifyPenaltyRequest,
   VerifyPenaltyResponse,
   LeaderboardEntry,
-} from '@/types/api';
-import { Hunter } from '@/types/database';
+} from "@/types/api";
+import { Hunter } from "@/types/database";
 
 export async function getUserProfileAction(
-  hunterId: string = 'usr_12345'
+  hunterId: string = "usr_12345",
 ): Promise<UserProfileResponse> {
   try {
     let hunter: Hunter | null = null;
@@ -27,25 +27,28 @@ export async function getUserProfileAction(
     if (isSupabaseConfigured && supabase) {
       try {
         const { data } = await supabase
-          .from('hunters')
-          .select('*')
-          .eq('id', hunterId)
+          .from("hunters")
+          .select("*")
+          .eq("id", hunterId)
           .single();
         if (data) hunter = data as Hunter;
       } catch (err) {
-        console.warn('Supabase profile fetch failed, using fallback mock DB:', err);
+        console.warn(
+          "Supabase profile fetch failed, using fallback mock DB:",
+          err,
+        );
       }
     }
 
     if (!hunter) {
       hunter = mockDb.hunters.get(hunterId) || {
         id: hunterId,
-        username: 'CodeNinja99',
+        username: "CodeNinja99",
         level: 1,
         mana_xp: 0,
         current_streak: 1,
         highest_streak: 1,
-        hunter_class: 'E-Rank Hunter',
+        hunter_class: "E-Rank Hunter",
         last_login_date: new Date().toISOString(),
         created_at: new Date().toISOString(),
         total_answered: 0,
@@ -56,7 +59,7 @@ export async function getUserProfileAction(
     const streakStatus = evaluateStreakStatus(
       hunter.last_login_date,
       hunter.current_streak,
-      hunter.highest_streak
+      hunter.highest_streak,
     );
 
     return {
@@ -72,11 +75,11 @@ export async function getUserProfileAction(
           currentStreak: streakStatus.currentStreak,
           highestStreak: hunter.highest_streak,
         },
-        badges: hunter.unlocked_badges.map(id => ({
+        badges: hunter.unlocked_badges.map((id) => ({
           badgeId: id,
           name: id,
           iconUrl: `/badges/${id}.png`,
-          description: `Badge ${id}`
+          description: `Badge ${id}`,
         })),
         needsPenaltyZone: streakStatus.needsPenaltyZone,
       },
@@ -84,15 +87,15 @@ export async function getUserProfileAction(
   } catch (err: any) {
     return {
       success: false,
-      error: err.message || 'Failed to fetch user profile',
+      error: err.message || "Failed to fetch user profile",
     };
   }
 }
 
 export async function getLeaderboardAction(
-  timeframe: string = 'weekly',
+  timeframe: string = "weekly",
   limit: number = 10,
-  currentUserId: string = 'usr_12345'
+  currentUserId: string = "usr_12345",
 ): Promise<LeaderboardResponse> {
   try {
     let huntersList: Hunter[] = [];
@@ -100,22 +103,25 @@ export async function getLeaderboardAction(
     if (isSupabaseConfigured && supabase) {
       try {
         const { data } = await supabase
-          .from('hunters')
-          .select('*')
-          .order('mana_xp', { ascending: false })
+          .from("hunters")
+          .select("*")
+          .order("mana_xp", { ascending: false })
           .limit(limit);
 
         if (data && data.length > 0) {
           huntersList = data as Hunter[];
         }
       } catch (err) {
-        console.warn('Supabase leaderboard fetch failed, using fallback mock DB:', err);
+        console.warn(
+          "Supabase leaderboard fetch failed, using fallback mock DB:",
+          err,
+        );
       }
     }
 
     if (huntersList.length === 0) {
       huntersList = Array.from(mockDb.hunters.values()).sort(
-        (a, b) => b.mana_xp - a.mana_xp
+        (a, b) => b.mana_xp - a.mana_xp,
       );
     }
 
@@ -141,17 +147,21 @@ export async function getLeaderboardAction(
   } catch (err: any) {
     return {
       success: false,
-      error: err.message || 'Failed to fetch leaderboard',
+      error: err.message || "Failed to fetch leaderboard",
     };
   }
 }
 
 export async function verifyPenaltyAction(
-  req: VerifyPenaltyRequest
+  req: VerifyPenaltyRequest,
 ): Promise<VerifyPenaltyResponse> {
   try {
     const { hunterId, score, totalQuestions, timeTakenSeconds } = req;
-    const result = verifyPenaltyQuizResult(score, totalQuestions, timeTakenSeconds);
+    const result = verifyPenaltyQuizResult(
+      score,
+      totalQuestions,
+      timeTakenSeconds,
+    );
 
     const hunter = mockDb.hunters.get(hunterId);
 
@@ -168,17 +178,20 @@ export async function verifyPenaltyAction(
       try {
         if (!result.passed) {
           await supabase
-            .from('hunters')
-            .update({ current_streak: 0, last_login_date: new Date().toISOString() })
-            .eq('id', hunterId);
+            .from("hunters")
+            .update({
+              current_streak: 0,
+              last_login_date: new Date().toISOString(),
+            })
+            .eq("id", hunterId);
         } else {
           await supabase
-            .from('hunters')
+            .from("hunters")
             .update({ last_login_date: new Date().toISOString() })
-            .eq('id', hunterId);
+            .eq("id", hunterId);
         }
       } catch (err) {
-        console.warn('Supabase penalty update failed:', err);
+        console.warn("Supabase penalty update failed:", err);
       }
     }
 
@@ -189,14 +202,14 @@ export async function verifyPenaltyAction(
         streakRestored: result.restoredStreak,
         currentStreak: hunter ? hunter.current_streak : 0,
         message: result.passed
-          ? 'Penalty Zone cleared! Daily streak restored.'
-          : 'Penalty Zone failed. Streak reset to 0.',
+          ? "Penalty Zone cleared! Daily streak restored."
+          : "Penalty Zone failed. Streak reset to 0.",
       },
     };
   } catch (err: any) {
     return {
       success: false,
-      error: err.message || 'Failed to verify penalty zone',
+      error: err.message || "Failed to verify penalty zone",
     };
   }
 }
