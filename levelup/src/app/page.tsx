@@ -46,17 +46,36 @@ export default function Home() {
   const [penaltyLessonData, setPenaltyLessonData] = useState<any>(null);
 
   useEffect(() => {
-    const fetchProfile = async (uid: string) => {
+    const fetchProfile = async (sessionUser: any) => {
       try {
-        const res = await getUserProfileAction(uid);
-        if (res.success && res.data) {
-          setUsername(res.data.username || "Hunter");
-          setXp(res.data.stats.totalXp);
-          setLevel(res.data.stats.currentLevel);
-          setHunterClass(res.data.hunterClass);
-          setDailyStreak(res.data.stats.currentStreak);
-          setAnswerStreak(res.data.stats.highestStreak);
-          setUnlockedBadges(res.data.badges.map((b: any) => b.badgeId));
+        let { data: profile } = await supabase.from('hunters').select('*').eq('id', sessionUser.id).single();
+        
+        if (!profile) {
+          const emailPrefix = sessionUser.email ? sessionUser.email.split('@')[0] : 'Hunter';
+          const { data: newProfile, error } = await supabase.from('hunters').insert({
+            id: sessionUser.id,
+            username: emailPrefix,
+            level: 1,
+            mana_xp: 0,
+            current_streak: 1,
+            highest_streak: 1,
+            hunter_class: "E-Rank Hunter",
+            total_answered: 0,
+            unlocked_badges: []
+          }).select().single();
+          
+          if (error) throw error;
+          profile = newProfile;
+        }
+
+        if (profile) {
+          setUsername(profile.username || "Hunter");
+          setXp(profile.mana_xp);
+          setLevel(profile.level);
+          setHunterClass(profile.hunter_class);
+          setDailyStreak(profile.current_streak);
+          setAnswerStreak(profile.highest_streak);
+          setUnlockedBadges(profile.unlocked_badges || []);
         }
       } catch (err) {
         console.error("Failed to fetch profile", err);
@@ -70,12 +89,12 @@ export default function Home() {
         return;
       } else {
         setHunterId(session.user.id);
-        await fetchProfile(session.user.id);
+        await fetchProfile(session.user);
         setIsAuthenticating(false);
       }
     };
     checkAuth();
-  }, [router, supabase.auth]);
+  }, [router, supabase]);
 
   const handleSelectTopic = async (topicId: string, topicName: string, rank: string) => {
     setIsLoadingLLM(true);
@@ -293,6 +312,7 @@ export default function Home() {
                 currentUsername={username}
                 currentLevel={level}
                 currentClass={hunterClass}
+                currentUserId={hunterId}
               />
             </motion.div>
           )}

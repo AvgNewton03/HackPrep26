@@ -2,27 +2,38 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { X, Save, AlertCircle } from "lucide-react";
+import { X, Save, AlertCircle, CheckCircle2 } from "lucide-react";
+import { createClient } from "@/utils/supabase/client";
 
 interface EditProfileModalProps {
   currentUsername: string;
   onClose: () => void;
   onSave: (username: string) => Promise<void>;
+  hunterId: string;
 }
 
-export default function EditProfileModal({ currentUsername, onClose, onSave }: EditProfileModalProps) {
+export default function EditProfileModal({ currentUsername, onClose, onSave, hunterId }: EditProfileModalProps) {
   const [username, setUsername] = useState(currentUsername);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const classes = ["Necromancer", "Shadow Monarch", "Assassin", "Mage", "Striker"];
+  const [success, setSuccess] = useState<string | null>(null);
 
   const handleSave = async () => {
     setIsLoading(true);
     setError(null);
+    setSuccess(null);
     try {
+      const supabase = createClient();
+      const { error: dbError } = await supabase
+        .from('hunters')
+        .update({ username })
+        .eq('id', hunterId);
+        
+      if (dbError) throw dbError;
+      
       await onSave(username);
-      onClose();
+      setSuccess("System Alert: Profile Synchronized");
+      setTimeout(() => onClose(), 1500);
     } catch (err: any) {
       setError(err.message || "Failed to update profile.");
     } finally {
@@ -57,11 +68,18 @@ export default function EditProfileModal({ currentUsername, onClose, onSave }: E
               <X size={20} />
             </button>
           </div>
-
+          
           {error && (
-            <div className="bg-[#ff003c]/10 border border-[#ff003c]/50 text-[#ff003c] p-3 rounded-sm flex items-start gap-3 font-mono text-sm shadow-[0_0_15px_rgba(255,0,60,0.15)]">
-              <AlertCircle className="shrink-0 mt-0.5" size={16} />
+            <div className="bg-[#ff003c]/10 border border-[#ff003c]/50 text-[#ff003c] p-3 rounded-sm mb-4 flex items-center gap-2 font-mono text-sm shadow-[0_0_15px_rgba(255,0,60,0.2)]">
+              <AlertCircle size={16} className="shrink-0" />
               <p>{error}</p>
+            </div>
+          )}
+          
+          {success && (
+            <div className="bg-[#00e5ff]/10 border border-[#00e5ff]/50 text-[#00e5ff] p-3 rounded-sm mb-4 flex items-center gap-2 font-mono text-sm shadow-[0_0_15px_rgba(0,229,255,0.2)]">
+              <CheckCircle2 size={16} className="shrink-0" />
+              <p>{success}</p>
             </div>
           )}
 

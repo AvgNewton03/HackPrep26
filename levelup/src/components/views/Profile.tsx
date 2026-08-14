@@ -190,6 +190,7 @@ export default function Profile({ stats, hunterId, onProfileUpdate }: ProfilePro
             currentUsername={stats.username}
             onClose={() => setIsEditProfileOpen(false)}
             onSave={handleProfileSave}
+            hunterId={hunterId}
           />
         )}
         {isUpdateEmailOpen && (

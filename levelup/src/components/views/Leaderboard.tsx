@@ -2,6 +2,8 @@
 
 import { motion } from "framer-motion";
 import { Trophy, Crown } from "lucide-react";
+import { useEffect, useState } from "react";
+import { createClient } from "@/utils/supabase/client";
 
 interface Hunter {
   id: string;
@@ -12,26 +14,48 @@ interface Hunter {
   isCurrentUser?: boolean;
 }
 
-const mockHunters: Hunter[] = [
-  { id: "1", name: "Thomas Andre", rank: 1, class: "Goliath", level: 99 },
-  { id: "2", name: "Liu Zhigang", rank: 2, class: "Fighter", level: 98 },
-  { id: "3", name: "Christopher Reed", rank: 3, class: "Mage", level: 97 },
-  { id: "4", name: "Goto Ryuji", rank: 4, class: "Assassin", level: 95 },
-  { id: "5", name: "Baek Yoonho", rank: 5, class: "Fighter", level: 93 },
-  { id: "6", name: "Choi Jong-In", rank: 6, class: "Mage", level: 92 },
-  { id: "7", name: "Cha Hae-In", rank: 7, class: "Fighter", level: 90 },
-  { id: "8", name: "Lennart Niermann", rank: 8, class: "Ranger", level: 88 },
-  { id: "9", name: "Kanae Tawata", rank: 9, class: "Assassin", level: 85 },
-  { id: "10", name: "Ma Dong-Wook", rank: 10, class: "Tank", level: 83 },
-];
+// Mock data removed
 
 interface LeaderboardProps {
   currentUsername?: string;
   currentLevel?: number;
   currentClass?: string;
+  currentUserId?: string;
 }
 
-export default function Leaderboard({ currentUsername = "Rishi Bhanushali", currentLevel = 1, currentClass = "E-Rank Hunter" }: LeaderboardProps) {
+export default function Leaderboard({ currentUsername = "Hunter", currentLevel = 1, currentClass = "E-Rank Hunter", currentUserId }: LeaderboardProps) {
+  const [hunters, setHunters] = useState<Hunter[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from('hunters')
+        .select('id, username, level, mana_xp')
+        .order('mana_xp', { ascending: false })
+        .limit(10);
+      
+      if (data) {
+        setHunters(data.map((h, i) => {
+          let title = "E-Class";
+          if (i === 0) title = "National Level";
+          else if (i <= 2) title = "S-Class";
+          else title = "A-Class";
+          
+          return {
+            id: h.id,
+            name: h.username,
+            rank: i + 1,
+            class: title,
+            level: h.level
+          };
+        }));
+      }
+      setIsLoading(false);
+    };
+    fetchLeaderboard();
+  }, []);
   const currentUser: Hunter = {
     id: "usr_12345",
     name: currentUsername,
@@ -67,27 +91,43 @@ export default function Leaderboard({ currentUsername = "Rishi Bhanushali", curr
 
       <div className="flex-1 overflow-hidden relative">
         <div className="h-full overflow-y-auto custom-scrollbar flex flex-col gap-3 pr-2 pb-28">
-          {mockHunters.map((hunter, index) => (
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
-              key={hunter.id}
-              className={`flex items-center p-4 rounded-lg border ${getRankStyle(hunter.rank)} transition-all duration-300 hover:scale-[1.02]`}
-            >
-              <div className="w-12 text-center font-bold text-xl font-mono">
-                {hunter.rank === 1 ? <Crown className="mx-auto" size={24} /> : `#${hunter.rank}`}
-              </div>
-              <div className="flex-1 ml-4">
-                <h3 className="font-bold text-lg tracking-wider uppercase text-white">{hunter.name}</h3>
-                <p className="text-xs uppercase tracking-widest opacity-80">{hunter.class}</p>
-              </div>
-              <div className="text-right">
-                <div className="font-mono font-bold text-xl">LVL {hunter.level}</div>
-                <div className="text-xs uppercase tracking-widest opacity-80">Hunter</div>
-              </div>
-            </motion.div>
-          ))}
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center h-full gap-4">
+              <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin shadow-[0_0_15px_#00e5ff]" />
+              <p className="text-cyan-400 font-mono text-sm tracking-widest uppercase animate-pulse">SYSTEM: Accessing Hunter Association Database...</p>
+            </div>
+          ) : (
+            hunters.map((hunter, index) => {
+              const isMe = hunter.id === currentUserId;
+              return (
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  key={hunter.id}
+                  className={`flex items-center p-4 rounded-lg border transition-all duration-300 hover:scale-[1.02] ${
+                    isMe 
+                      ? "bg-yellow-900/30 border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.2)]" 
+                      : getRankStyle(hunter.rank)
+                  }`}
+                >
+                  <div className="w-12 text-center font-bold text-xl font-mono">
+                    {hunter.rank === 1 ? <Crown className={isMe ? "mx-auto text-yellow-500" : "mx-auto"} size={24} /> : `#${hunter.rank}`}
+                  </div>
+                  <div className="flex-1 ml-4">
+                    <h3 className={`font-bold text-lg tracking-wider uppercase ${isMe ? "text-yellow-400" : "text-white"}`}>
+                      {hunter.name} {isMe && "(You)"}
+                    </h3>
+                    <p className={`text-xs uppercase tracking-widest opacity-80 ${isMe ? "text-yellow-200" : ""}`}>{hunter.class}</p>
+                  </div>
+                  <div className={`text-right ${isMe ? "text-yellow-400" : ""}`}>
+                    <div className="font-mono font-bold text-xl">LVL {hunter.level}</div>
+                    <div className="text-xs uppercase tracking-widest opacity-80">Hunter</div>
+                  </div>
+                </motion.div>
+              );
+            })
+          )}
         </div>
       </div>
 
